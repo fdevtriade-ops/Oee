@@ -1,0 +1,158 @@
+[
+  {
+    "id": "f30edbebad5043a8",
+    "type": "comment",
+    "z": "5acaed9b151e49c6",
+    "name": "Ligue MQTT My_Home_1/BM/JSON direto em Preparar JSON para API",
+    "info": "Importe no fluxo atual. O novo ramo recebe o JSON antes de Parse & Validate e To Line Protocol. O botão de teste envia uma amostra somente quando clicado. Edite BACKEND_URL no nó Preparar JSON para API se necessário.",
+    "x": 440,
+    "y": 440,
+    "wires": []
+  },
+  {
+    "id": "f30edbebad5043a1",
+    "type": "function",
+    "z": "5acaed9b151e49c6",
+    "name": "Preparar JSON para API",
+    "func": "// Cole no nó Function \"Preparar JSON para API\".\n// Conecte diretamente ao MQTT in do tópico My_Home_1/BM/JSON.\nconst BACKEND_URL = env.get(\"BACKEND_URL\") || \"http://127.0.0.1:8080/api/leituras\";\n\nif (msg.topic !== \"My_Home_1/BM/JSON\") {\n    return null;\n}\n\nlet dados = msg.payload;\nif (Buffer.isBuffer(dados)) {\n    dados = dados.toString(\"utf8\");\n}\n\nif (typeof dados === \"string\") {\n    try {\n        dados = JSON.parse(dados);\n    } catch (erro) {\n        node.error(\"O payload não contém JSON válido\", msg);\n        return null;\n    }\n}\n\nif (!dados || typeof dados !== \"object\" || Array.isArray(dados)) {\n    node.error(\"O payload deve ser um objeto JSON\", msg);\n    return null;\n}\n\nif (typeof dados.id !== \"string\" || dados.id.trim() === \"\") {\n    node.error(\"O JSON deve conter o id do equipamento\", msg);\n    return null;\n}\n\nconst digitais = [\"DI1\", \"DI2\", \"DI3\", \"DI4\", \"DO1\", \"DO2\", \"DO3\", \"DO4\"];\nconst analogicos = [\"AI1\", \"AI2\", \"AI3\", \"AI4\"];\nconst payload = { id: dados.id };\n\nfor (const canal of digitais) {\n    if (dados[canal] !== 0 && dados[canal] !== 1) {\n        node.error(`${canal} deve ser um número 0 ou 1`, msg);\n        return null;\n    }\n    payload[canal] = dados[canal];\n}\n\nfor (const canal of analogicos) {\n    if (typeof dados[canal] !== \"number\" || !Number.isFinite(dados[canal])) {\n        node.error(`${canal} deve ser um número finito`, msg);\n        return null;\n    }\n    payload[canal] = dados[canal];\n}\n\n// Somente payload será o corpo HTTP. Os demais campos controlam o nó HTTP Request.\n// Esta rota MQTT cria headers próprios e não herda configurações da rota Influx.\nreturn {\n    _msgid: msg._msgid,\n    equipamentoId: payload.id,\n    method: \"POST\",\n    url: BACKEND_URL,\n    headers: { \"Content-Type\": \"application/json\", \"Accept\": \"application/json\" },\n    payload: JSON.stringify(payload),\n    requestTimeout: 10000,\n    followRedirects: false\n};\n",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 460,
+    "y": 520,
+    "wires": [
+      [
+        "f30edbebad5043a2"
+      ]
+    ]
+  },
+  {
+    "id": "f30edbebad5043a2",
+    "type": "http request",
+    "z": "5acaed9b151e49c6",
+    "name": "POST API Spring Boot",
+    "method": "use",
+    "ret": "txt",
+    "paytoqs": "ignore",
+    "url": "",
+    "tls": "",
+    "persist": false,
+    "proxy": "",
+    "insecureHTTPParser": false,
+    "authType": "",
+    "senderr": false,
+    "headers": [],
+    "x": 730,
+    "y": 520,
+    "wires": [
+      [
+        "f30edbebad5043a3"
+      ]
+    ]
+  },
+  {
+    "id": "f30edbebad5043a3",
+    "type": "function",
+    "z": "5acaed9b151e49c6",
+    "name": "Conferir resposta HTTP",
+    "func": "const status = Number(msg.statusCode);\nif (!Number.isInteger(status) || status < 200 || status >= 300) {\n    node.error(`Falha no envio ao backend: ${msg.statusCode || \"sem resposta HTTP\"}`, msg);\n    return null;\n}\n\nmsg.payload = {\n    recebido: true,\n    id: msg.equipamentoId,\n    statusCode: status\n};\nreturn msg;\n",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 990,
+    "y": 520,
+    "wires": [
+      [
+        "f30edbebad5043a4"
+      ]
+    ]
+  },
+  {
+    "id": "f30edbebad5043a4",
+    "type": "debug",
+    "z": "5acaed9b151e49c6",
+    "name": "JSON recebido pelo backend",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 1270,
+    "y": 520,
+    "wires": []
+  },
+  {
+    "id": "f30edbebad5043a5",
+    "type": "catch",
+    "z": "5acaed9b151e49c6",
+    "name": "Erros deste envio",
+    "scope": [
+      "f30edbebad5043a1",
+      "f30edbebad5043a2",
+      "f30edbebad5043a3"
+    ],
+    "uncaught": false,
+    "x": 720,
+    "y": 620,
+    "wires": [
+      [
+        "f30edbebad5043a6"
+      ]
+    ]
+  },
+  {
+    "id": "f30edbebad5043a6",
+    "type": "debug",
+    "z": "5acaed9b151e49c6",
+    "name": "Falha ao encaminhar JSON",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "error.message",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 1000,
+    "y": 620,
+    "wires": []
+  },
+  {
+    "id": "f30edbebad5043a7",
+    "type": "inject",
+    "z": "5acaed9b151e49c6",
+    "name": "Teste manual: JSON da imagem",
+    "props": [
+      {
+        "p": "payload"
+      },
+      {
+        "p": "topic",
+        "vt": "str"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "My_Home_1/BM/JSON",
+    "payload": "{\"id\":\"TRD2001\",\"DI1\":0,\"DI2\":0,\"DI3\":0,\"DI4\":0,\"DO1\":0,\"DO2\":0,\"DO3\":0,\"DO4\":0,\"AI1\":3.17,\"AI2\":5.17,\"AI3\":6.99,\"AI4\":2.24}",
+    "payloadType": "json",
+    "x": 170,
+    "y": 600,
+    "wires": [
+      [
+        "f30edbebad5043a1"
+      ]
+    ]
+  }
+]

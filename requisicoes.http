@@ -1,0 +1,34 @@
+### Variáveis para clientes compatíveis com arquivos .http
+@baseUrl = http://localhost:8080
+@maquinaId = TRD2001
+
+### Consultar máquinas
+GET {{baseUrl}}/api/equipamentos
+
+### Consultar funções das DIs
+GET {{baseUrl}}/api/funcoes-di
+
+### Consultar configurações de uma máquina
+GET {{baseUrl}}/api/equipamentos/{{maquinaId}}/configuracoes
+
+### Configurar DI1: sinal de máquina parada ativo em 1
+PUT {{baseUrl}}/api/equipamentos/{{maquinaId}}/canais/DI1
+Content-Type: application/json
+
+{
+  "nome": "Máquina Parada",
+  "funcao": "MAQUINA_PARADA",
+  "nivelAtivo": 1,
+  "habilitado": true
+}
+
+### Inverter DI1: sinal de máquina parada ativo em 0
+PUT {{baseUrl}}/api/equipamentos/{{maquinaId}}/canais/DI1
+Content-Type: application/json
+
+{
+  "nome": "Máquina Parada",
+  "funcao": "MAQUINA_PARADA",
+  "nivelAtivo": 0,
+  "habilitado": true
+}
