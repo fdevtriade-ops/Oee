@@ -126,7 +126,7 @@ Configure `POSTGRES_URL`, `POSTGRES_USER` e `POSTGRES_PASSWORD` nas variáveis d
 
 As leituras continuam temporariamente em memória, mantendo somente a última por equipamento. Reiniciar a API apaga essas leituras. As configurações permanecem no PostgreSQL e não são sobrescritas pela chegada de dados.
 
-Não estão implementados nesta etapa: histórico persistente de leituras, descoberta/cadastro automático, ativação da linha, comandos de habilitação RISING/FALLING, recuperação de acumulados, cálculo de PPM/OEE, interpretação operacional dos canais, InfluxDB e tela de configuração. Aceitar -1 não habilita nem reconfigura a placa automaticamente.
+Não estão implementados nesta etapa: histórico persistente de leituras, cadastro operacional automático, ativação da linha, comandos de habilitação RISING/FALLING, recuperação de acumulados, cálculo de PPM/OEE, interpretação operacional dos canais, InfluxDB e tela de configuração. Aceitar -1 não habilita nem reconfigura a placa automaticamente.
 
 O JAR `telemetria-oee.jar` na raiz é uma distribuição anterior. Para gerar uma distribuição atualizada, execute `mvn clean package` em `backend` e utilize `backend/target/telemetria-api-1.1.0.jar`. Não execute o JAR antigo esperando o novo contrato.
 
@@ -139,3 +139,15 @@ Os testes usam HTTP real em porta aleatória e banco H2 temporário em modo Post
 ## Referência
 
 [Spring Boot: conexão com bancos SQL e Spring JDBC](https://docs.spring.io/spring-boot/reference/data/sql.html)
+
+## Primeira etapa do configurador
+
+Foram adicionados `GET /api/dispositivos`, `GET /api/dispositivos/{id}`,
+`GET /api/linhas/rascunhos` e GET/PUT `/api/dispositivos/{id}/linha-rascunho`.
+Os dispositivos são descobertos pelas leituras válidas recebidas nesta execução;
+os rascunhos de linha, produto e velocidade ideal ficam persistidos no PostgreSQL.
+A configuração atual de canais e o contrato de telemetria foram preservados.
+
+Antes de salvar, aplique `banco/001_linha_rascunho.sql` no banco OEE pelo IntelliJ.
+Siga `banco/LEIA-ME.md` e use `cadastro-linha.http` para testar individualmente cada etapa.
+Não há migração automática nem ativação operacional nesta entrega.

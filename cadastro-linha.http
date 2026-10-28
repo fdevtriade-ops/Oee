@@ -1,0 +1,31 @@
+### Executar individualmente; aplicar banco/001_linha_rascunho.sql antes de salvar.
+### A API deve estar rodando e ter recebido uma leitura do dispositivo.
+@baseUrl = http://localhost:8080
+@dispositivoId = TRD2001
+
+### 1. Dispositivos observados nesta execução da API
+GET {{baseUrl}}/api/dispositivos
+
+### 2. Últimos valores e canais da placa (DI, contadores, DO e AI)
+GET {{baseUrl}}/api/dispositivos/{{dispositivoId}}
+
+### 3. Consultar rascunho atual (404 é esperado antes do primeiro cadastro)
+GET {{baseUrl}}/api/dispositivos/{{dispositivoId}}/linha-rascunho
+
+### 4. Criar rascunho. Substitua nome, produto e velocidade pelos seus valores.
+### versao 0 cria; se já existir, retorna 409 sem sobrescrever.
+PUT {{baseUrl}}/api/dispositivos/{{dispositivoId}}/linha-rascunho
+Content-Type: application/json
+
+{
+  "nomeLinha": "Linha piloto",
+  "produto": "Produto piloto",
+  "velocidadeIdealPpm": 100,
+  "versao": 0
+}
+
+### 5. Listar cadastros persistidos, inclusive sem leitura após reiniciar a API
+GET {{baseUrl}}/api/linhas/rascunhos
+
+### Para editar: consulte a etapa 3 e envie o PUT da etapa 4 com a versao retornada.
+### Não use Run All: execute cada requisição conforme a etapa e revise os valores.

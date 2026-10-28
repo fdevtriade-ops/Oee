@@ -7,6 +7,8 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.format.ResolverStyle;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -96,6 +98,12 @@ public class LeituraService {
     private IllegalArgumentException timestampInvalido() {
         return new IllegalArgumentException(
                 "O campo timestamp é obrigatório e deve conter uma data válida no formato dd/MM/yyyy HH:mm:ss.");
+    }
+
+    public List<Map<String, Object>> listar() {
+        return ultimasLeituras.values().stream()
+                .sorted(Comparator.comparing(leitura -> (String) leitura.get("id")))
+                .toList();
     }
 
     public Optional<Map<String, Object>> buscar(String id) {
