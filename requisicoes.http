@@ -32,3 +32,31 @@ Content-Type: application/json
   "nivelAtivo": 0,
   "habilitado": true
 }
+
+### Receber leitura completa MK2 (204 em caso de sucesso)
+POST {{baseUrl}}/api/leituras
+Content-Type: application/json
+
+{
+  "id": "TRD2001",
+  "DI1": 0,
+  "DI2": 0,
+  "DI3": 0,
+  "DI4": 0,
+  "contadorDI1": -1,
+  "contadorDI2": -1,
+  "contadorDI3": -1,
+  "contadorDI4": -1,
+  "DO1": 0,
+  "DO2": 0,
+  "DO3": 0,
+  "DO4": 0,
+  "AI1": 0,
+  "AI2": 0,
+  "AI3": 0,
+  "AI4": 0,
+  "timestamp": "28/10/2026 10:21:13"
+}
+
+### Consultar última leitura, com timestamp da placa e recebidoEm em UTC
+GET {{baseUrl}}/api/leituras/{{maquinaId}}

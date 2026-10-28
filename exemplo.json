@@ -4,12 +4,17 @@
   "DI2": 0,
   "DI3": 0,
   "DI4": 0,
+  "contadorDI1": -1,
+  "contadorDI2": -1,
+  "contadorDI3": -1,
+  "contadorDI4": -1,
   "DO1": 0,
   "DO2": 0,
   "DO3": 0,
   "DO4": 0,
-  "AI1": 3.17,
-  "AI2": 5.17,
-  "AI3": 6.99,
-  "AI4": 2.24
+  "AI1": 0,
+  "AI2": 0,
+  "AI3": 0,
+  "AI4": 0,
+  "timestamp": "28/10/2026 10:21:13"
 }

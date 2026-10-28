@@ -98,19 +98,43 @@ Regras:
 - Máquina/canal inexistente retorna 404. Configuração inválida retorna 400. A configuração anterior é preservada quando a validação falha.
 - Novos canais, como DI5, podem ser configurados por este endpoint depois de cadastrados na tabela `canal`. Esta versão não adiciona endpoints para criar máquinas ou canais.
 
+## Recebimento de leituras MK2
+
+`POST /api/leituras` exige o objeto completo mostrado em `exemplo.json`:
+
+- `id`: texto não vazio.
+- `DI1` a `DI4` e `DO1` a `DO4`: números 0 ou 1.
+- `contadorDI1` a `contadorDI4`: números inteiros de 0 a 9223372036854775807, ou -1 para contador desligado/desconfigurado. O valor -1 é preservado e não é produção negativa. Contadores fracionários ou fora desse limite são rejeitados, sem truncamento.
+- `AI1` a `AI4`: números finitos entre 0 e 10 V, inclusive; -0,0 equivale a zero.
+- `timestamp`: texto obrigatório no formato `dd/MM/yyyy HH:mm:ss`, com data e hora válidas. É o horário de envio da placa, preservado sem presumir fuso.
+
+A API responde HTTP 204 sem corpo quando aceita a leitura. Campos ausentes ou inválidos retornam HTTP 400 e não substituem a última leitura válida. Campos extras são ignorados.
+
+`GET /api/leituras/{id}` devolve os 18 campos do contrato MK2 mais `recebidoEm`, gerado pelo servidor no início do processamento, como instante UTC em ISO 8601 (por exemplo, `2026-10-28T13:21:13Z`). Um `recebidoEm` enviado pelo cliente não é utilizado. Equipamento sem leitura retorna HTTP 404.
+
+O fuso da placa, a sincronização dos relógios e a política para atraso ainda precisam ser definidos. Não há cálculo de atraso nem descarte por antiguidade nesta etapa; a consulta continua representando a última leitura aceita por ordem de processamento.
+
+### Ajuste manual no Node-RED
+
+Os arquivos da pasta `node-red` não foram alterados. O preparador antigo remove contadores e timestamp; após esta atualização da API, isso causará HTTP 400. Ajuste manualmente o nó para encaminhar os 18 campos do exemplo, preservando seus tipos numéricos e o texto de timestamp. O endpoint e a resposta de sucesso 204 permanecem iguais. O arquivo `requisicoes.http` permite testar diretamente pelo IntelliJ antes de ajustar o fluxo.
+
+### Executar no IntelliJ
+
+Configure `POSTGRES_URL`, `POSTGRES_USER` e `POSTGRES_PASSWORD` nas variáveis de ambiente da configuração Run/Debug. A URL possui o padrão local documentado; usuário e senha não possuem valor padrão. Reinicie `TelemetriaApplication` após recompilar. A inicialização verifica o schema existente e não cria ou altera tabelas.
+
 ## O que continua pendente
 
-O recebimento anterior em `POST /api/leituras` e a consulta em `GET /api/leituras/{id}` continuam disponíveis. As leituras continuam temporariamente em memória e ainda exigem os 12 canais originais. A configuração salva no PostgreSQL não é sobrescrita pela chegada de uma leitura.
+As leituras continuam temporariamente em memória, mantendo somente a última por equipamento. Reiniciar a API apaga essas leituras. As configurações permanecem no PostgreSQL e não são sobrescritas pela chegada de dados.
 
-A próxima etapa é implementar a gravação das leituras no InfluxDB e a apresentação dos estados usando as configurações salvas. Contagem por pulsos, cálculo de velocidade, aceitação de canais adicionais na telemetria e a tela de configuração ainda não estão implementados.
+Não estão implementados nesta etapa: histórico persistente de leituras, descoberta/cadastro automático, ativação da linha, comandos de habilitação RISING/FALLING, recuperação de acumulados, cálculo de PPM/OEE, interpretação operacional dos canais, InfluxDB e tela de configuração. Aceitar -1 não habilita nem reconfigura a placa automaticamente.
+
+O JAR `telemetria-oee.jar` na raiz é uma distribuição anterior. Para gerar uma distribuição atualizada, execute `mvn clean package` em `backend` e utilize `backend/target/telemetria-api-1.1.0.jar`. Não execute o JAR antigo esperando o novo contrato.
 
 ## Testes
 
-Build concluído e 54 testes aprovados: 35 do recebimento de leituras e 19 das configurações, incluindo persistência SQL, isolamento por máquina, inversão do nível ativo, AIs vazias e rejeição de dados inválidos.
+Execute `mvn test` dentro de `backend`. Os testes de leitura verificam o contrato MK2, o JSON real com todos os contadores -1, campos obrigatórios, contagens grandes, limites analógicos, datas inválidas, horário de recebimento do servidor e preservação da leitura anterior após rejeição. Os testes de configuração também devem continuar passando.
 
-Execute `mvn test` dentro da pasta `backend`. Os testes usam HTTP real e um banco H2 temporário em modo PostgreSQL, com uma adaptação do schema fornecido (`btrim` foi substituído por `trim`). As propriedades de teste estão em `src/test/resources` e não são incluídas no JAR de produção. Os testes não usam as credenciais do ambiente nem acessam seu banco OEE.
-
-O acesso ao PostgreSQL real precisa ser confirmado no seu ambiente usando os passos acima. A API ainda não possui autenticação; os endpoints estão preparados para desenvolvimento em ambiente controlado.
+Os testes usam HTTP real em porta aleatória e banco H2 temporário em modo PostgreSQL. Não usam as credenciais do ambiente nem acessam seu banco OEE. O acesso ao PostgreSQL real precisa ser confirmado no seu ambiente. A API ainda não possui autenticação.
 
 ## Referência
 
