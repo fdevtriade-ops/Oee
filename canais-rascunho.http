@@ -1,0 +1,66 @@
+### Execute cada requisição individualmente. Body dos PUTs: raw / JSON no Postman.
+### Aplicar banco/002_canal_rascunho.sql e reiniciar a API antes de usar.
+### TRD_TESTE precisa ter um rascunho de linha salvo (cadastro-linha.http).
+@baseUrl = http://127.0.0.1:8080
+@dispositivoId = TRD_TESTE
+
+### 1. Listar configurações já salvas. [] é normal antes do primeiro canal.
+GET {{baseUrl}}/api/dispositivos/{{dispositivoId}}/canais-rascunho
+
+### 2. Configurar DI3 como estado. Exemplo de teste: 1 = rodando, 0 = parada.
+PUT {{baseUrl}}/api/dispositivos/{{dispositivoId}}/canais-rascunho/DI3
+Content-Type: application/json
+
+{
+  "nome": "Estado da máquina",
+  "habilitado": true,
+  "funcao": "MAQUINA_RODANDO",
+  "parametros": { "nivelAtivo": 1 },
+  "versao": 0
+}
+
+### 3. Configurar contadorDI1 como total produzido (exemplo de teste).
+### A borda é somente armazenada; não envia comando MQTT à placa.
+PUT {{baseUrl}}/api/dispositivos/{{dispositivoId}}/canais-rascunho/contadorDI1
+Content-Type: application/json
+
+{
+  "nome": "Produção total",
+  "habilitado": true,
+  "funcao": "TOTAL_PRODUZIDO",
+  "parametros": {
+    "unidade": "pecas",
+    "fator": 1,
+    "borda": "RISING"
+  },
+  "versao": 0
+}
+
+### 4. Configurar AI1: exemplo hipotético de sensor de pressão 0–10 V / 0–100 bar.
+PUT {{baseUrl}}/api/dispositivos/{{dispositivoId}}/canais-rascunho/AI1
+Content-Type: application/json
+
+{
+  "nome": "Pressão",
+  "habilitado": true,
+  "funcao": "MEDIDA_ANALOGICA",
+  "parametros": {
+    "grandeza": "Pressão",
+    "unidade": "bar",
+    "tensaoMin": 0,
+    "tensaoMax": 10,
+    "valorMin": 0,
+    "valorMax": 100
+  },
+  "versao": 0
+}
+
+### 5. Consultar configuração do contador. Retorna versão própria do canal.
+GET {{baseUrl}}/api/dispositivos/{{dispositivoId}}/canais-rascunho/contadorDI1
+
+### 6. Consultar canais salvos (os três exemplos acima).
+GET {{baseUrl}}/api/dispositivos/{{dispositivoId}}/canais-rascunho
+
+### Para editar: reenviar o PUT completo com a versao atual retornada no GET.
+### Para deixar sem uso: PUT completo com nome null, habilitado false, funcao null,
+### parametros {} e a versao atual (ou 0, se ainda não existir).

@@ -151,3 +151,11 @@ A configuração atual de canais e o contrato de telemetria foram preservados.
 Antes de salvar, aplique `banco/001_linha_rascunho.sql` no banco OEE pelo IntelliJ.
 Siga `banco/LEIA-ME.md` e use `cadastro-linha.http` para testar individualmente cada etapa.
 Não há migração automática nem ativação operacional nesta entrega.
+
+## Configuração dos canais em rascunho
+
+Adicionados GET da lista e GET/PUT por canal em `/api/dispositivos/{id}/canais-rascunho`.
+Aplique `banco/002_canal_rascunho.sql` após o script 001 e use `canais-rascunho.http`.
+As funções e parâmetros de DI, contador e medida analógica estão documentados em
+`banco/CANAIS-RASCUNHO.md`. Cada canal tem uma versão própria, independente da linha.
+A borda RISING/FALLING é apenas cadastrada; não há comando enviado à placa.

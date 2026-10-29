@@ -24,5 +24,9 @@ class CadastroSemMigracaoTest {
                 HttpResponse.BodyHandlers.ofString());
         assertEquals(503,r.statusCode());
         assertTrue(r.body().contains("001_linha_rascunho.sql"));
+        var canais = http.send(HttpRequest.newBuilder(URI.create("http://localhost:"+porta+"/api/dispositivos/TESTE_A/canais-rascunho")).GET().build(),
+                HttpResponse.BodyHandlers.ofString());
+        assertEquals(503,canais.statusCode());
+        assertTrue(canais.body().contains("002_canal_rascunho.sql"));
     }
 }

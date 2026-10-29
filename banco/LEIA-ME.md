@@ -1,6 +1,6 @@
 # Cadastro inicial da linha
 
-Esta entrega adiciona descoberta dos dispositivos recebidos e um rascunho persistente de nome da linha, produto fixo e velocidade ideal em produtos por minuto. Não ativa produção, não envia comandos à placa e não escreve no InfluxDB. Os canais recebidos são apresentados com seus valores brutos; a configuração ampliada de contadores e AIs e a tela web serão etapas seguintes.
+Esta entrega adiciona descoberta dos dispositivos recebidos e um rascunho persistente de nome da linha, produto fixo e velocidade ideal em produtos por minuto. Não ativa produção, não envia comandos à placa e não escreve no InfluxDB. Os canais recebidos são apresentados com seus valores brutos; a configuração de canais está disponível após a migração 002 (ver CANAIS-RASCUNHO.md); a tela web será uma etapa seguinte.
 
 ## Aplicar pelo IntelliJ
 
