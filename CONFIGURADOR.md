@@ -38,3 +38,7 @@ O cadastro continua em RASCUNHO. Não há ativação operacional, cálculo de OE
 ## Prévia da configuração salva
 
 O bloco de prévia interpreta a última amostra de DI, AI e contador, identificando a versão salva aplicada. Há aviso para alterações ainda não salvas. A interpretação é somente consultiva, sem ativação de produção. Veja `PREVIA-SINAIS.md` e `previa-sinais.http` para os estados, fórmulas e exemplos.
+
+## Laboratório de contadores
+
+O link Simulador de contadores no topo abre `/simulador.html`. Ele confere a matemática de quantidade e PPM usando somente o cenário informado, sem aplicar mudanças à linha. Regras e exemplos em `SIMULADOR.md`.

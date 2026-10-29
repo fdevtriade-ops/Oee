@@ -1,0 +1,22 @@
+{
+  "canal": "contadorDI1",
+  "fator": 1,
+  "amostras": [
+    {
+      "sessao": "A",
+      "leitura": {
+        "id": "TRD_TESTE",
+        "timestamp": "29/10/2026 15:00:00",
+        "contadorDI1": 1000
+      }
+    },
+    {
+      "sessao": "A",
+      "leitura": {
+        "id": "TRD_TESTE",
+        "timestamp": "29/10/2026 15:00:05",
+        "contadorDI1": 1010
+      }
+    }
+  ]
+}

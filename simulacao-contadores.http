@@ -1,0 +1,29 @@
+### Simulador isolado. Não altera leituras, cadastros, banco ou placa.
+@baseUrl = http://127.0.0.1:8080
+
+### Exemplo: 1000 -> 1010 em 5 segundos = 10 produtos, 120 PPM.
+POST {{baseUrl}}/api/simulacoes/contadores
+Content-Type: application/json
+
+{
+  "canal": "contadorDI1",
+  "fator": 1,
+  "amostras": [
+    {
+      "sessao": "A",
+      "leitura": {
+        "id": "TRD_TESTE",
+        "timestamp": "29/10/2026 15:00:00",
+        "contadorDI1": 1000
+      }
+    },
+    {
+      "sessao": "A",
+      "leitura": {
+        "id": "TRD_TESTE",
+        "timestamp": "29/10/2026 15:00:05",
+        "contadorDI1": 1010
+      }
+    }
+  ]
+}

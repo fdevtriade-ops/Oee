@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light">
+<title>Simulador de contadores | Tríade OEE</title>
+<link rel="stylesheet" href="/assets/oee-config.css"><link rel="stylesheet" href="/assets/oee-simulador.css">
+<script src="/assets/oee-simulador.js" defer></script>
+</head>
+<body>
+<header class="topbar"><a class="brand" href="/" aria-label="Voltar ao configurador"><span class="brand-mark" aria-hidden="true">△</span><strong>tríade<span> / OEE</span></strong></a><span class="top-context">Laboratório de sinais</span><a class="sim-nav" href="/">← Configurador</a><span class="local-label"><i></i> Ambiente local</span></header>
+<main class="sim-main">
+<div class="page-heading"><div><div class="eyebrow">TESTES DE PRODUÇÃO</div><h1>Simulador de contadores</h1><p>Confira quantidade e velocidade entre leituras controladas.</p></div><span class="badge">Simulação</span></div>
+<p class="sim-intro">Os cálculos usam somente a sequência abaixo. Não alteram as leituras da placa nem os cadastros da linha.</p>
+<div class="sim-grid">
+<section class="panel" aria-labelledby="scenario-title"><div class="panel-heading"><div><span class="step-number">01</span><h2 id="scenario-title">Preparar cenário</h2></div></div>
+<form id="simulation-form">
+<div class="sim-form">
+<label>Exemplo<select id="example"><option value="normal">10 peças em 5 segundos</option><option value="media">Intervalos com durações diferentes</option><option value="sessao">Contador -1 e nova sessão</option><option value="inconsistencia">Horário repetido e contador decrescente</option></select></label>
+<button type="button" class="secondary" id="load-example">Carregar exemplo</button>
+<div class="two-fields"><label>Contador<select id="counter"><option>contadorDI1</option><option>contadorDI2</option><option>contadorDI3</option><option>contadorDI4</option></select></label><label>Produtos por contagem<input id="factor" type="number" step="any" min="0" required value="1"></label></div>
+<label>Amostras em JSON<textarea id="samples" spellcheck="false" required aria-describedby="samples-help"></textarea></label>
+<p id="samples-help" class="note">De 2 a 500 amostras. Cada uma declara <code>sessao</code> e contém a <code>leitura</code> da placa. A simulação usa o ID, o timestamp e o contador selecionado; os demais canais são opcionais aqui.</p>
+<p class="note">Os horários de cada sessão devem compartilhar a mesma referência de relógio. Não são convertidos para UTC. A sessão é declarada apenas para este teste.</p>
+</div>
+<div class="form-footer"><span id="scenario-state">Cenário de exemplo pronto.</span><button class="primary" id="simulate" type="submit">Executar simulação</button></div>
+</form></section>
+<section class="panel sim-help" aria-labelledby="rules-title"><div class="panel-heading"><div><span class="step-number">↗</span><h2 id="rules-title">Como ler o resultado</h2></div></div><div class="sim-rules"><div><span class="small-title">QUANTIDADE NO INTERVALO</span><p>(contador atual − anterior) × fator</p></div><div><span class="small-title">VELOCIDADE EM PPM</span><p>quantidade × 60 ÷ segundos</p></div><div><span class="small-title">MÉDIA DA SIMULAÇÃO</span><p>quantidade total válida × 60 ÷ tempo válido</p></div><p class="note">A primeira amostra de cada sessão é uma referência. Sem intervalo válido, os indicadores ficam indisponíveis.</p><p class="note">Contador -1 ou decrescente exige uma nova sessão declarada. Horários repetidos ou fora de ordem descartam intervalos; a próxima leitura cronológica válida restabelece a referência.</p><p class="note">Este resultado não é OEE, produção do turno ou recuperação automática de um contador real.</p></div></section>
+</div>
+<div id="simulation-error" class="message error" role="alert" hidden></div>
+<section id="simulation-result" aria-labelledby="result-title" hidden>
+<div class="result-heading"><div><div class="eyebrow">CONFERÊNCIA DOS INTERVALOS</div><h2 id="result-title">Resultado da simulação</h2></div><span id="result-status" class="badge"></span></div>
+<p id="result-context" class="note"></p>
+<div class="sim-stats"><div class="panel"><span class="small-title">QUANTIDADE CALCULADA</span><strong id="total-quantity">—</strong><span>Somente intervalos válidos</span></div><div class="panel"><span class="small-title">PPM MÉDIO</span><strong id="average-ppm">—</strong><span>Calculado pelo tempo válido</span></div><div class="panel"><span class="small-title">TEMPO CALCULADO</span><strong id="total-seconds">—</strong><span id="valid-intervals"></span></div></div>
+<div class="panel table-panel"><div class="table-scroll" tabindex="0" role="region" aria-label="Resultados por amostra"><table><thead><tr><th scope="col">Amostra</th><th scope="col">Sessão / envio</th><th scope="col">Contador</th><th scope="col">Intervalo</th><th scope="col">Quantidade</th><th scope="col">PPM</th><th scope="col">Situação</th></tr></thead><tbody id="result-rows"></tbody></table></div></div>
+<p class="note">Intervalos indisponíveis não são tratados como produção zero. A quantidade e o PPM não são calculados entre sessões diferentes.</p>
+</section>
+<footer class="page-footer"><span>TRÍADE · OEE</span><a href="/">Voltar à configuração da linha</a></footer>
+</main><dialog id="replace-dialog" aria-labelledby="replace-title"><h2 id="replace-title">Substituir o cenário?</h2><p>As amostras editadas serão substituídas pelo exemplo selecionado.</p><div class="dialog-actions"><button type="button" class="secondary" id="keep-scenario">Manter edição</button><button type="button" class="primary" id="replace-scenario">Carregar exemplo</button></div></dialog></body></html>
