@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Configuração de linhas | Tríade OEE</title>
+  <link rel="stylesheet" href="/assets/oee-config.css">
+  <script src="/assets/oee-config.js" defer></script>
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="/" aria-label="Tríade OEE início"><span class="brand-mark" aria-hidden="true">△</span><strong>tríade<span> / OEE</span></strong></a>
+  <span class="top-context">Configuração de produção</span><span class="local-label"><i></i> Ambiente local</span>
+</header>
+<div class="shell">
+  <aside class="sidebar" aria-label="Dispositivos">
+    <div class="aside-heading"><span>DISPOSITIVOS</span><button id="refresh" class="icon-button" title="Atualizar dispositivos e leituras" aria-label="Atualizar dispositivos e leituras">↻</button></div>
+    <label class="search-label"><span class="sr-only">Buscar dispositivo ou linha</span><input id="search" type="search" placeholder="Buscar dispositivo ou linha…"></label>
+    <div id="device-list" class="device-list" aria-label="Selecionar dispositivo"></div>
+    <div class="aside-note"><span class="small-title">Da placa à configuração</span><p>Os dispositivos aparecem após o recebimento de uma leitura. Os rascunhos salvos continuam disponíveis após reiniciar a API.</p></div>
+  </aside>
+  <main id="main">
+    <div class="page-heading"><div><div class="eyebrow">PREPARAÇÃO DA LINHA</div><h1>Configuração da linha</h1><p>Associe os sinais da placa à sua operação.</p></div><span class="badge">Rascunho</span></div>
+    <div id="global-message" class="message" role="status" aria-live="polite" hidden></div>
+    <section id="empty" class="empty panel"><span class="empty-symbol" aria-hidden="true">↗</span><h2>Selecione um dispositivo</h2><p>Escolha uma placa na lista para configurar a linha e seus canais.</p></section>
+    <div id="workspace" hidden>
+      <div class="device-summary"><div><span class="small-title">DISPOSITIVO SELECIONADO</span><h2 id="device-title"></h2></div><div class="summary-meta"><span id="reading-presence"></span><span>Recebido: <strong id="received-at">—</strong></span></div></div>
+      <section class="panel line-panel" aria-labelledby="line-heading">
+        <div class="panel-heading"><div><span class="step-number">01</span><h2 id="line-heading">Identificação e produção</h2></div><span id="line-version" class="version"></span></div>
+        <form id="line-form">
+          <div class="line-fields">
+            <label>Nome da linha<input name="nomeLinha" maxlength="150" required placeholder="Ex.: Linha de envase 01"></label>
+            <label>Produto fixo<input name="produto" maxlength="150" required placeholder="Ex.: Frasco 500 ml"></label>
+            <label><span>Velocidade ideal <span class="muted">(produtos/min)</span></span><input name="velocidadeIdealPpm" type="number" step="any" min="0" required placeholder="Ex.: 100"></label>
+          </div>
+          <div id="line-message" class="message" role="status" aria-live="polite" hidden></div>
+          <div class="form-footer"><span id="line-state">Cadastre a linha para configurar seus canais.</span><button type="submit" class="primary" id="line-save">Salvar linha</button></div>
+        </form>
+      </section>
+      <section class="panel channels-panel" aria-labelledby="channels-heading">
+        <div class="panel-heading"><div><span class="step-number">02</span><h2 id="channels-heading">Sinais e canais</h2></div><span id="configured-count" class="version"></span></div>
+        <div class="channels-layout">
+          <div class="channel-directory"><div class="filters" role="group" aria-label="Filtrar canais"><button type="button" data-filter="all" aria-pressed="true">Todos</button><button type="button" data-filter="DI" aria-pressed="false">DI</button><button type="button" data-filter="CONTADOR" aria-pressed="false">Cont.</button><button type="button" data-filter="AI" aria-pressed="false">AI</button><button type="button" data-filter="DO" aria-pressed="false">DO</button></div><div id="channel-list"></div></div>
+          <div class="channel-editor">
+            <div class="editor-heading"><div><span id="channel-type" class="small-title"></span><h3 id="channel-title"></h3></div><span id="channel-version" class="version"></span></div>
+            <div class="raw-reading"><div><span class="small-title">ÚLTIMA LEITURA BRUTA</span><strong id="channel-value">—</strong></div><span id="channel-reading-state"></span></div>
+            <p id="channel-lock" class="note" hidden></p>
+            <form id="channel-form">
+              <fieldset id="channel-fields"><legend class="sr-only">Configuração do canal</legend>
+                <label class="toggle-row"><span><strong>Usar este canal</strong><small>Habilita o canal neste rascunho.</small></span><input id="channel-enabled" name="habilitado" type="checkbox" role="switch"></label>
+                <label>Nome do canal<input name="nome" maxlength="150" placeholder="Ex.: Estado da máquina"></label>
+                <div id="channel-parameters"></div>
+              </fieldset>
+              <div id="channel-message" class="message" role="status" aria-live="polite" hidden></div>
+              <div class="form-footer"><span id="channel-state"></span><button type="submit" class="primary" id="channel-save">Salvar canal</button></div>
+            </form>
+          </div>
+        </div>
+      </section>
+      <div class="bottom-note"><span>Configurações em preparação. A ativação da linha será uma etapa posterior.</span><button id="reload" class="text-button" type="button">Recarregar cadastro salvo</button></div>
+    </div>
+    <footer class="page-footer"><span>TRÍADE · OEE</span><span>Configuração local de linhas de produção</span></footer>
+  </main>
+</div>
+<dialog id="discard-dialog" aria-labelledby="discard-title">
+  <h2 id="discard-title">Descartar alterações?</h2>
+  <p>Há alterações não salvas. Ao continuar, será carregado o cadastro salvo.</p>
+  <div class="dialog-actions"><button id="discard-cancel" class="secondary" type="button">Continuar editando</button><button id="discard-confirm" class="primary" type="button">Descartar alterações</button></div>
+</dialog>
+</body>
+</html>

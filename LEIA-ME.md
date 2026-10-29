@@ -159,3 +159,11 @@ Aplique `banco/002_canal_rascunho.sql` após o script 001 e use `canais-rascunho
 As funções e parâmetros de DI, contador e medida analógica estão documentados em
 `banco/CANAIS-RASCUNHO.md`. Cada canal tem uma versão própria, independente da linha.
 A borda RISING/FALLING é apenas cadastrada; não há comando enviado à placa.
+
+## Configurador web local
+
+Com a API atualizada em execução, abra `http://127.0.0.1:8080/`.
+A página permite selecionar dispositivos, consultar suas últimas leituras e editar
+os rascunhos da linha e dos canais. A interface é incluída no JAR e utiliza as mesmas
+rotas já verificadas no Postman. Não exige instalação de frontend separado nem nova migração.
+Consulte `CONFIGURADOR.md` para instalação, comportamento de versões e conferência.
