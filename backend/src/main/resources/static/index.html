@@ -45,6 +45,13 @@
           <div class="channel-editor">
             <div class="editor-heading"><div><span id="channel-type" class="small-title"></span><h3 id="channel-title"></h3></div><span id="channel-version" class="version"></span></div>
             <div class="raw-reading"><div><span class="small-title">ÚLTIMA LEITURA BRUTA</span><strong id="channel-value">—</strong></div><span id="channel-reading-state"></span></div>
+            <section class="interpreted-reading" aria-labelledby="preview-title">
+              <div class="preview-heading"><span id="preview-title" class="small-title">PRÉVIA DA CONFIGURAÇÃO SALVA</span><span id="preview-status" class="preview-status">Aguardando</span></div>
+              <strong id="preview-value">—</strong>
+              <p id="preview-detail">Selecione uma linha cadastrada para interpretar a última amostra.</p>
+              <span id="preview-origin" class="preview-origin"></span>
+              <p id="preview-unsaved" class="preview-unsaved" hidden>Há alterações não salvas. A prévia usa a configuração salva no servidor.</p>
+            </section>
             <p id="channel-lock" class="note" hidden></p>
             <form id="channel-form">
               <fieldset id="channel-fields"><legend class="sr-only">Configuração do canal</legend>

@@ -126,7 +126,7 @@ Configure `POSTGRES_URL`, `POSTGRES_USER` e `POSTGRES_PASSWORD` nas variáveis d
 
 As leituras continuam temporariamente em memória, mantendo somente a última por equipamento. Reiniciar a API apaga essas leituras. As configurações permanecem no PostgreSQL e não são sobrescritas pela chegada de dados.
 
-Não estão implementados nesta etapa: histórico persistente de leituras, cadastro operacional automático, ativação da linha, comandos de habilitação RISING/FALLING, recuperação de acumulados, cálculo de PPM/OEE, interpretação operacional dos canais, InfluxDB e tela de configuração. Aceitar -1 não habilita nem reconfigura a placa automaticamente.
+Não estão implementados nesta etapa: histórico persistente de leituras, cadastro operacional automático, ativação da linha, comandos de habilitação RISING/FALLING, recuperação de acumulados, cálculo de PPM/OEE, processamento temporal operacional e InfluxDB. A interface de rascunhos e a prévia consultiva estão disponíveis, conforme as seções seguintes. Aceitar -1 não habilita nem reconfigura a placa automaticamente.
 
 O JAR `telemetria-oee.jar` na raiz é uma distribuição anterior. Para gerar uma distribuição atualizada, execute `mvn clean package` em `backend` e utilize `backend/target/telemetria-api-1.1.0.jar`. Não execute o JAR antigo esperando o novo contrato.
 
@@ -167,3 +167,10 @@ A página permite selecionar dispositivos, consultar suas últimas leituras e ed
 os rascunhos da linha e dos canais. A interface é incluída no JAR e utiliza as mesmas
 rotas já verificadas no Postman. Não exige instalação de frontend separado nem nova migração.
 Consulte `CONFIGURADOR.md` para instalação, comportamento de versões e conferência.
+
+## Prévia dos sinais
+
+GET `/api/dispositivos/{id}/previa` interpreta a última amostra com o rascunho salvo:
+estados digitais por polaridade, medida analógica por escala e valor da amostra do
+contador por fator. A tela apresenta o resultado e sua situação, incluindo ausências
+e contador -1. Não requer migração nova. Consulte `PREVIA-SINAIS.md`.

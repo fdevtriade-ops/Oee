@@ -33,4 +33,8 @@ As últimas leituras do dispositivo selecionado são consultadas a cada cinco se
 
 A verificação automatizada usa H2 isolado, sem acessar o PostgreSQL real. A interface também foi testada no navegador com criação e edição de linha, DI, AI e contador, conflito de versão, confirmação de descarte e apresentação em telas desktop e móvel. Nenhum dado simulado é incluído no frontend de produção.
 
-O cadastro continua em RASCUNHO. Não há ativação operacional, cálculo de OEE/PPM, conversão aplicada às leituras, comandos à placa ou escrita no InfluxDB. A interface usa as novas rotas de rascunho; o cadastro legado de canais permanece independente, conforme documentado na etapa anterior.
+O cadastro continua em RASCUNHO. Não há ativação operacional, cálculo de OEE/PPM, comandos à placa ou escrita no InfluxDB. A interface usa as novas rotas de rascunho; o cadastro legado de canais permanece independente, conforme documentado na etapa anterior.
+
+## Prévia da configuração salva
+
+O bloco de prévia interpreta a última amostra de DI, AI e contador, identificando a versão salva aplicada. Há aviso para alterações ainda não salvas. A interpretação é somente consultiva, sem ativação de produção. Veja `PREVIA-SINAIS.md` e `previa-sinais.http` para os estados, fórmulas e exemplos.

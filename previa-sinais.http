@@ -1,0 +1,6 @@
+### Prévia somente de leitura. Requer rascunho da linha e migrações 001/002 existentes.
+@baseUrl = http://127.0.0.1:8080
+@dispositivoId = TRD_TESTE
+
+### Interpreta a última amostra com as configurações salvas; sem corpo no GET.
+GET {{baseUrl}}/api/dispositivos/{{dispositivoId}}/previa

@@ -11,7 +11,7 @@
   };
   const types = { DI:'Entrada digital', CONTADOR:'Contador acumulado', AI:'Entrada analógica', DO:'Saída digital' };
   const channels = ['DI','CONTADOR','AI','DO'].flatMap(type => [1,2,3,4].map(n => ({type,code:type==='CONTADOR'?`contadorDI${n}`:`${type}${n}`})));
-  const state = { devices:[], readings:new Map(), drafts:new Map(), legacy:new Map(), selected:null, line:null, configs:new Map(), code:'DI1', filter:'all', lineDirty:false, channelDirty:false, busy:false, loading:false, lineReady:false, channelsReady:false, inventoryReady:false, generation:0 };
+  const state = { devices:[], readings:new Map(), drafts:new Map(), legacy:new Map(), selected:null, line:null, configs:new Map(), code:'DI1', filter:'all', lineDirty:false, channelDirty:false, busy:false, loading:false, lineReady:false, channelsReady:false, inventoryReady:false, generation:0, preview:null, previewError:null, previewRequest:0 };
   class ApiError extends Error { constructor(status,message) { super(message); this.status=status; } }
   async function api(path, options = {}) {
     const controller = new AbortController();
@@ -66,6 +66,7 @@
     state[`${kind}Dirty`] = true;
     $(`${kind}-state`).textContent = 'Alterações não salvas';
     message(`${kind}-message`);
+    renderPreview();
   }
   function setBusy(value) {
     state.busy=value;
@@ -115,6 +116,41 @@
     $('channel-value').textContent=c ? `${c.valor}${currentChannel().type==='AI'?' V':''}` : '—';
     $('channel-reading-state').textContent=!c ? 'Sem amostra disponível' : c.situacaoLeitura==='DESLIGADO_OU_DESCONFIGURADO' ? 'Contador desligado ou desconfigurado' : `Enviado pela placa: ${device.timestamp}`;
     renderChannels();
+    renderPreview();
+  }
+  function renderPreview() {
+    const labels={VALIDO:'Leitura válida',SEM_CONFIGURACAO:'Sem configuração',DESABILITADO:'Sem uso',SEM_LEITURA:'Sem leitura',CONTADOR_DESCONFIGURADO:'Contador desconfigurado',FORA_DA_FAIXA:'Fora da faixa',CONFIGURACAO_INVALIDA:'Configuração inválida',LEITURA_INVALIDA:'Leitura inválida',SOMENTE_LEITURA:'Somente leitura'};
+    const p=state.preview?.canais.find(c=>c.codigo===state.code);
+    let status,detail,value='—',origin='';
+    if(state.previewError) {status='ERRO';detail=state.previewError;}
+    else if(!state.line) {status='SEM_CONFIGURACAO';detail='Salve o rascunho da linha para consultar a interpretação.';}
+    else if(!p) {status='AGUARDANDO';detail='Consultando a prévia da última amostra…';}
+    else {
+      status=p.situacao; detail=p.detalhe; value=p.valorFormatado;
+      origin=p.versaoConfiguracao ? `Configuração salva: versão ${p.versaoConfiguracao}.` : 'Sem versão de configuração aplicada.';
+      if(state.preview.timestamp) origin+=` Amostra enviada: ${state.preview.timestamp}.`;
+      const local=state.configs.get(state.code);
+      if(local && local.versao!==p.versaoConfiguracao) origin+=' O cadastro mudou no servidor. Recarregue para editar a versão atual.';
+      if(p.valorBrutoTexto!==null) $('channel-value').textContent=p.valorBrutoTexto+(p.tipo==='AI'?' V':'');
+    }
+    $('preview-status').textContent=labels[status] || (status==='ERRO'?'Indisponível':'Aguardando');
+    $('preview-status').dataset.status=status;
+    $('preview-value').textContent=value;
+    $('preview-detail').textContent=detail;
+    $('preview-origin').textContent=origin;
+    $('preview-unsaved').hidden=!state.channelDirty;
+  }
+  async function refreshPreview() {
+    if(!state.selected || !state.line) {renderPreview();return;}
+    const id=state.selected,generation=state.generation,request=++state.previewRequest;
+    try {
+      const data=await api(`/api/dispositivos/${encodeURIComponent(id)}/previa`);
+      if(id!==state.selected || generation!==state.generation || request!==state.previewRequest) return;
+      state.preview=data;state.previewError=null;renderPreview();
+    } catch(e) {
+      if(id!==state.selected || generation!==state.generation || request!==state.previewRequest) return;
+      state.preview=null;state.previewError=e.message;renderPreview();
+    }
   }
   function selectField(name,label,options,value,extra='') {
     return `<label class="${extra}">${label}<select name="${name}" required>${options.map(([v,l])=>`<option value="${v}" ${String(v)===String(value)?'selected':''}>${escape(l)}</option>`).join('')}</select></label>`;
@@ -147,7 +183,7 @@
       html+=field('tensaoMax','Entrada máxima (V)',p.tensaoMax ?? 10,{number:true,min:0,max:10});
       html+=field('valorMin','Valor na entrada mínima',p.valorMin ?? 0,{number:true});
       html+=field('valorMax','Valor na entrada máxima',p.valorMax ?? 100,{number:true});
-      html+='<p class="field-note span-all">A escala fica cadastrada. A leitura bruta acima continua sendo apresentada em volts.</p>';
+      html+='<p class="field-note span-all">A prévia converte a tensão pela escala salva. A leitura bruta continua sendo apresentada em volts.</p>';
     }
     $('channel-parameters').innerHTML=html;
     updateEnabled(); updateLocks(); updateReadings();
@@ -172,6 +208,7 @@
     const errors=results.filter(r=>r.status==='rejected').map(r=>r.reason.message);
     message('global-message',errors.length?`Não foi possível carregar todos os dados: ${[...new Set(errors)].join(' ')}`:'',!!errors.length);
     renderDevices(); updateReadings(); $('refresh').disabled=false;
+    if(state.selected && state.line) await refreshPreview();
     if(initial && state.devices.length) await selectDevice(state.devices[0]);
   }
   async function selectDevice(id,force=false) {
@@ -179,6 +216,7 @@
     if(!await allowDiscard()) return;
     state.selected=id; state.line=null; state.configs=new Map(); state.lineReady=false; state.channelsReady=false;
     state.lineDirty=false; state.channelDirty=false; state.loading=true;
+    state.preview=null; state.previewError=null; state.previewRequest++;
     const generation=++state.generation;
     $('empty').hidden=true; $('workspace').hidden=false; $('workspace').classList.add('loading');
     $('device-title').textContent=id; message('line-message'); message('channel-message');
@@ -205,6 +243,7 @@
         $('line-state').textContent=l?`Salvo em ${time(l.atualizadoEm)}`:'Cadastre a linha para configurar seus canais.';
         state.code=[...state.configs.keys()][0] || 'DI1';
         renderEditor();
+        await refreshPreview();
         // renderEditor limpa apenas mensagens do formulário, preservando falhas de carregamento.
         if(state.line && !state.channelsReady) message('channel-message',`${channelError || 'Não foi possível carregar os canais.'} Use “Recarregar cadastro salvo” para tentar novamente.`,true);
       }
@@ -231,8 +270,9 @@
       message('line-message','Rascunho da linha salvo.'); renderDevices();
       if(!state.channelsReady) {
         try { const data=await api(`${path()}/canais-rascunho`); state.configs=new Map(data.map(c=>[c.codigo,c])); state.channelsReady=true; renderEditor(); }
-        catch(e) { channelError=e.message; }
+        catch(e) { message('channel-message',e.message,true); }
       }
+      await refreshPreview();
     } catch(e) { message('line-message',e.status===409?`${e.message} Seu formulário foi mantido. Use “Recarregar cadastro salvo” antes de editar novamente.`:e.message,true); }
     finally { setBusy(false); }
   }
@@ -257,6 +297,7 @@
     try {
       const saved=await api(`${path()}/canais-rascunho/${c.code}`,{method:'PUT',body:JSON.stringify(body)});
       state.configs.set(c.code,saved); renderEditor(); message('channel-message',`${c.code} salvo em rascunho.`);
+      await refreshPreview();
     } catch(e) { message('channel-message',e.status===409?`${e.message} Seu formulário foi mantido. Use “Recarregar cadastro salvo” para consultar a versão atual.`:e.message,true); }
     finally { setBusy(false); }
   }
@@ -293,7 +334,7 @@
         if(e.status===404) {state.readings.delete(id);updateReadings();renderDevices();}
         else $('reading-presence').textContent='Não foi possível atualizar a leitura';
       }
-    } finally {polling=false;}
+    } finally {await refreshPreview(); polling=false;}
   },5000);
   loadInventory(true);
 })();
