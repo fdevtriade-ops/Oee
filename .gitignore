@@ -1,0 +1,19 @@
+# IDE e arquivos locais
+.idea/
+*.iml
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Compilação e diagnósticos
+**/target/
+*.jar
+*.log
+*.dump
+*.dumpstream
+
+# Credenciais locais
+.env
+.env.*
+!.env.example
+*.local.properties

@@ -1,0 +1,42 @@
+# Execute individualmente. Troque o ID pela linha de teste criada na interface.
+# Esta política é um cenário local, não o calendário da fábrica.
+@baseUrl = http://localhost:8080
+@id = LOCAL_TROQUE_PELO_ID_DA_DEMONSTRACAO
+
+### Consultar revisão concluída
+GET {{baseUrl}}/api/dispositivos/{{id}}/configuracao/concluida
+
+### Ativar a revisão conferida; ajuste o número e todas as regras
+POST {{baseUrl}}/api/dispositivos/{{id}}/operacao/ativar
+Content-Type: application/json
+
+{
+  "revisao": 1,
+  "politica": {
+    "fuso": "UTC",
+    "lacunaMaximaSegundos": 15,
+    "atrasoMaximoSegundos": 3600,
+    "adiantamentoMaximoSegundos": 3600,
+    "microparadaLimiteSegundos": 10,
+    "microparadaLimiteInclusivo": true,
+    "turnos": [{"nome":"Teste 24h","inicio":"00:00","fim":"00:00"}],
+    "estadoNoIntervalo": "AMOSTRA_ANTERIOR",
+    "foraDeOrdem": "IGNORAR",
+    "lacunas": "DESCARTAR_E_REINICIAR_REFERENCIA",
+    "fronteiras": "DESCARTAR_INTERVALO",
+    "programadas": "EXCLUIR_DO_PLANEJADO",
+    "paradaInterrompida": "DESCARTAR_PENDENTES"
+  }
+}
+
+### Estado e referências persistidas
+GET {{baseUrl}}/api/dispositivos/{{id}}/operacao
+
+### Indicadores da execução
+GET {{baseUrl}}/api/dispositivos/{{id}}/operacao/indicadores
+
+### Bases e indicadores por minuto
+GET {{baseUrl}}/api/dispositivos/{{id}}/operacao/indicadores?agrupamento=MINUTO
+
+### Consolidação por turno
+GET {{baseUrl}}/api/dispositivos/{{id}}/operacao/indicadores?agrupamento=TURNO

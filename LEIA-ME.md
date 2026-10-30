@@ -1,5 +1,11 @@
 # Conectar a API ao banco OEE
 
+**Pacote local atualizado:** comece por [COMECE-AQUI.md](COMECE-AQUI.md). A ativação, o motor local, a continuidade, turnos/paradas e indicadores estão em [MOTOR-OPERACIONAL.md](MOTOR-OPERACIONAL.md), com as migrações 004/005 e a página `/operacao.html`. O simulador antigo continua isolado. Os comandos da placa física dependem do contrato MQTT; os comandos de teste estão disponíveis na placa simulada local.
+
+A conferência e conclusão dos cadastros está disponível em `/conclusao.html`, após a migração 003. Consulte [CONCLUSAO-CONFIGURACAO.md](CONCLUSAO-CONFIGURACAO.md). Ela guarda revisões persistentes; a habilitação do motor é feita separadamente em `/operacao.html`.
+
+Para instalação do zero e atualização entre máquinas, siga [INSTALACAO-ATUALIZACAO.md](INSTALACAO-ATUALIZACAO.md). Para o ramo MQTT compatível com contadores e timestamp, veja [node-red/LEIA-ME.md](node-red/LEIA-ME.md).
+
 Esta é a versão 1.1.0 da API, preparada para o PostgreSQL que você já criou:
 
 - Banco padrão: `OEE`.
@@ -21,17 +27,18 @@ POSTGRES_PASSWORD=sua_senha_do_postgres
 
 Substitua os valores de exemplo localmente. Se o PostgreSQL estiver em outra máquina ou container, ajuste o host e a porta de `POSTGRES_URL`. O nome do banco na URL deve corresponder exatamente ao nome exibido no PostgreSQL. O usuário precisa de acesso ao banco e ao schema, leitura nas três tabelas e atualização na tabela `configuracao.canal`.
 
-Não é necessário criar o banco novamente ou executar `schema.sql`/`exemplo.sql` outra vez. A opção `spring.sql.init.mode=never` está configurada.
+Em um banco já preparado, não é necessário recriar as tabelas. Em banco vazio, execute `banco/000_configuracao_inicial.sql`, `001_linha_rascunho.sql` e `002_canal_rascunho.sql`, nessa ordem. A opção `spring.sql.init.mode=never` permanece configurada.
 
 ## 2. Iniciar
 
-Com Java 17 ou superior e as variáveis configuradas, execute na pasta deste pacote:
+Com Java 17 ou superior e as variáveis configuradas, compile e execute a partir da raiz do projeto:
 
 ```sh
-java -jar telemetria-oee.jar
+mvn -f backend/pom.xml package
+java -jar backend/target/telemetria-api-1.1.0.jar
 ```
 
-Ou abra a pasta `backend` na IDE e execute `TelemetriaApplication`. Com Maven 3.6.3 ou superior, também pode executar dentro de `backend`:
+Este pacote inclui `telemetria-oee.jar` atualizado na raiz. Uma compilação Maven posterior não o substitui automaticamente: use `compilar.ps1` para recompilar, testar e atualizar essa cópia. Abra a pasta `backend` na IDE e execute `TelemetriaApplication` como alternativa. Com Maven 3.6.3 ou superior, também pode executar dentro de `backend`:
 
 ```sh
 mvn spring-boot:run
@@ -126,9 +133,9 @@ Configure `POSTGRES_URL`, `POSTGRES_USER` e `POSTGRES_PASSWORD` nas variáveis d
 
 As leituras continuam temporariamente em memória, mantendo somente a última por equipamento. Reiniciar a API apaga essas leituras. As configurações permanecem no PostgreSQL e não são sobrescritas pela chegada de dados.
 
-Não estão implementados nesta etapa: histórico persistente de leituras, cadastro operacional automático, ativação da linha, comandos de habilitação RISING/FALLING, recuperação de acumulados, cálculo operacional de PPM/OEE, processamento temporal operacional e InfluxDB. A interface de rascunhos e a prévia consultiva estão disponíveis, conforme as seções seguintes. Aceitar -1 não habilita nem reconfigura a placa automaticamente.
+O motor local persiste intervalos, bases e referências, com ativação explícita, produção/PPM, indicadores e retomada. Não há histórico completo de mensagens brutas nem InfluxDB nesta entrega. Comandos de habilitação e recuperação estão disponíveis na placa simulada local; aceitar -1 na coleta real não configura a placa física automaticamente. Veja MOTOR-OPERACIONAL.md para as políticas e limites.
 
-O JAR `telemetria-oee.jar` na raiz é uma distribuição anterior. Para gerar uma distribuição atualizada, execute `mvn clean package` em `backend` e utilize `backend/target/telemetria-api-1.1.0.jar`. Não execute o JAR antigo esperando o novo contrato.
+O JAR `telemetria-oee.jar` da raiz foi recompilado para este pacote. Para gerar outra distribuição, execute `compilar.ps1`, ou `mvn package` em `backend` e use `backend/target/telemetria-api-1.1.0.jar`.
 
 ## Testes
 
@@ -150,7 +157,7 @@ A configuração atual de canais e o contrato de telemetria foram preservados.
 
 Antes de salvar, aplique `banco/001_linha_rascunho.sql` no banco OEE pelo IntelliJ.
 Siga `banco/LEIA-ME.md` e use `cadastro-linha.http` para testar individualmente cada etapa.
-Não há migração automática nem ativação operacional nesta entrega.
+Não há migração automática. A ativação operacional é uma ação separada na página `/operacao.html`, após concluir o cadastro e informar as regras.
 
 ## Configuração dos canais em rascunho
 

@@ -34,4 +34,4 @@ VALIDO indica compatibilidade da amostra com o mapeamento, não garantia de que 
 
 Os testes automatizados usam H2 isolado e cobrem polaridade, funções digitais, conversão, limites, escala decrescente, precisão dos contadores, ausência de amostra, configuração inválida e consulta HTTP sem alterar leituras nem cadastros. O navegador foi verificado com dados simulados em uma API temporária.
 
-OEE, PPM, sessões de contadores, recuperação de acumulados, coerência temporal dos sinais, classificação de paradas e microparadas, ativação e InfluxDB seguem para etapas posteriores. Nenhum comando é enviado à placa por esta consulta.
+O motor local oferece OEE, PPM, sessões, retomada, turnos/paradas e ativação em `/operacao.html`, separado desta consulta. Veja `MOTOR-OPERACIONAL.md`. A prévia permanece consultiva e não envia comandos; o InfluxDB e o protocolo de comando da placa física não estão integrados nesta entrega.

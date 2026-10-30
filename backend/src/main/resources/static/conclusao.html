@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Concluir configuração | Tríade OEE</title>
+  <link rel="stylesheet" href="/assets/oee-config.css">
+  <script src="/assets/oee-conclusao.js" defer></script>
+</head>
+<body>
+  <header class="topbar"><a class="brand" href="/">△ tríade / OEE</a><a href="/">Voltar ao configurador</a></header>
+  <main style="max-width:1000px;margin:auto;padding:24px">
+    <div class="page-heading"><div><h1>Concluir configuração</h1><p>Confira as fontes de estado, produção e qualidade da linha.</p></div></div>
+    <p class="note">A conclusão guarda uma revisão dos cadastros salvos. Depois, abra <a href="/operacao.html">Operação e indicadores</a> para informar as regras e ativar o processamento local.</p>
+    <section class="panel line-panel">
+      <form id="conclusao-form">
+        <fieldset id="conclusao-fields" style="border:0;padding:0">
+          <legend class="sr-only">Fontes da configuração</legend>
+          <label>Linha cadastrada<select id="dispositivo" required><option value="">Selecione uma linha</option></select></label>
+          <p id="identificacao" class="note"></p>
+          <div class="line-fields">
+            <label>Estado da máquina<select id="estado" required><option value="">Selecione um canal</option></select></label>
+            <label>Total produzido<select id="total" required><option value="">Selecione um canal</option></select></label>
+            <label>Qualidade: boas ou rejeitadas<select id="qualidade" required><option value="">Selecione um canal</option></select></label>
+          </div>
+          <p class="note">As listas mostram canais salvos e habilitados com funções compatíveis. O total e a qualidade devem usar a mesma unidade de produto. Para alterar canais, volte ao configurador e salve o cadastro.</p>
+          <div class="form-footer"><button id="conferir" type="submit" class="secondary">Conferir configuração</button><button id="concluir" type="button" class="primary" disabled>Concluir configuração</button></div>
+        </fieldset>
+      </form>
+      <div id="resultado" class="message" role="status" aria-live="polite" hidden></div>
+      <p id="revisao" class="note"></p>
+    </section>
+  </main>
+</body>
+</html>

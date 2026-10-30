@@ -9,7 +9,7 @@ A página é servida pelo próprio Spring Boot, na raiz da aplicação. Com Tele
 3. Recompile e reinicie TelemetriaApplication com as mesmas variáveis POSTGRES_URL, POSTGRES_USER e POSTGRES_PASSWORD utilizadas anteriormente.
 4. Abra a raiz da aplicação no navegador. Se já estava aberta com uma versão anterior, atualize a página (Ctrl+F5 no Windows).
 
-Os arquivos de interface estão em backend/src/main/resources/static e são incluídos no JAR pelo Maven. Não é necessário servidor frontend separado, Node.js, npm ou acesso externo para carregar a página. O JAR antigo da raiz não recebe as alterações automaticamente; para executar empacotado, utilize o JAR atualizado em backend/target após mvn package.
+Os arquivos de interface estão em backend/src/main/resources/static e são incluídos no JAR pelo Maven. Não é necessário servidor frontend separado, Node.js, npm ou acesso externo para carregar a página. Este pacote inclui o JAR da raiz atualizado; compilações posteriores usam backend/target, e compilar.ps1 atualiza também a cópia da raiz.
 
 ## Utilizar
 
@@ -33,7 +33,7 @@ As últimas leituras do dispositivo selecionado são consultadas a cada cinco se
 
 A verificação automatizada usa H2 isolado, sem acessar o PostgreSQL real. A interface também foi testada no navegador com criação e edição de linha, DI, AI e contador, conflito de versão, confirmação de descarte e apresentação em telas desktop e móvel. Nenhum dado simulado é incluído no frontend de produção.
 
-O cadastro continua em RASCUNHO. Não há ativação operacional, cálculo de OEE/PPM, comandos à placa ou escrita no InfluxDB. A interface usa as novas rotas de rascunho; o cadastro legado de canais permanece independente, conforme documentado na etapa anterior.
+O cadastro desta página continua em RASCUNHO. A conclusão guarda uma revisão em `/conclusao.html`; a ativação e os indicadores ficam em `/operacao.html`, conforme `MOTOR-OPERACIONAL.md`. Os comandos disponíveis são da placa simulada local; a integração de comando físico e o InfluxDB permanecem separados. O cadastro legado de canais continua independente.
 
 ## Prévia da configuração salva
 

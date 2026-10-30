@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Operação local | Tríade OEE</title>
+  <link rel="stylesheet" href="/assets/oee-config.css"><link rel="stylesheet" href="/assets/oee-operacao.css">
+  <script src="/assets/oee-operacao.js" defer></script>
+</head>
+<body>
+<header class="topbar"><a class="brand" href="/" aria-label="Tríade OEE início"><span class="brand-mark" aria-hidden="true">△</span><strong>tríade<span> / OEE</span></strong></a><a href="/">Configurador</a><a href="/conclusao.html">Concluir configuração</a><span class="local-label"><i></i> Operação local</span></header>
+<main class="operation-main">
+  <div class="page-heading"><div><div class="eyebrow">ACOMPANHAMENTO DA LINHA</div><h1>Operação e indicadores</h1><p>Ative uma revisão concluída e acompanhe os intervalos válidos de produção.</p></div></div>
+  <div id="message" class="message" role="status" aria-live="polite" hidden></div>
+  <section class="panel line-panel">
+    <div class="line-fields"><label>Linha<select id="device"><option value="">Selecione uma linha</option></select></label><div class="operation-actions"><button id="refresh" class="secondary">Atualizar</button><button id="demo" class="secondary">Preparar demonstração local</button></div></div>
+    <p id="revision" class="note"></p><p id="status" class="note">Selecione uma linha ou prepare uma demonstração.</p>
+  </section>
+  <section class="panel line-panel">
+    <div class="panel-heading"><h2>Regras da execução</h2></div>
+    <form id="policy-form"><fieldset id="policy-fields">
+      <p class="note">Os valores iniciais são um cenário de teste local. Ajuste antes de ativar sua linha. A execução usa uma cópia da revisão concluída; editar o rascunho não muda a execução em andamento.</p>
+      <div class="line-fields">
+        <label>Fuso do horário da placa<input id="zone" value="UTC" required maxlength="100" placeholder="Ex.: America/Sao_Paulo"></label>
+        <label>Maior intervalo aceito entre amostras (s)<input id="gap" type="number" min="1" max="86400" value="15" required></label>
+        <label>Atraso máximo da amostra (s)<input id="delay" type="number" min="0" value="3600" required></label>
+        <label>Adiantamento máximo do relógio (s)<input id="future" type="number" min="0" value="3600" required></label>
+        <label>Limite de microparada (s)<input id="micro" type="number" min="0" max="3600" value="10" required></label>
+        <label class="operation-checkbox"><input id="inclusive" type="checkbox" checked>Incluir duração igual ao limite como microparada</label>
+      </div>
+      <h3>Turnos no fuso informado</h3><p class="note">Início incluído e fim excluído. Horários iguais representam 24 horas. Os turnos não podem se sobrepor.</p>
+      <div id="shifts"></div><button id="add-shift" class="secondary" type="button">Adicionar turno</button>
+      <p class="note">O estado no início da amostra vale para o intervalo seguinte. Mensagens repetidas ou fora de ordem são ignoradas. Lacunas, deltas que cruzam fronteiras de minuto/turno e sinais inconsistentes ficam fora das contas. Paradas programadas são excluídas do tempo planejado. Microparadas são classificadas ao fechar o evento; se a continuidade se perder, seus intervalos ainda pendentes são descartados.</p>
+      <div class="form-footer"><span>Aplicar à próxima execução</span><button id="activate" class="primary" type="submit">Ativar processamento</button></div>
+    </fieldset></form>
+  </section>
+  <section class="panel line-panel" aria-labelledby="metrics-title">
+    <div class="panel-heading"><h2 id="metrics-title">Indicadores da execução</h2><span id="metrics-time" class="version"></span></div>
+    <div class="metrics" id="metrics"></div>
+    <p id="coverage" class="note"></p><p id="events" class="note"></p>
+    <p class="note">Os percentuais são recalculados pelas bases somadas. Performance exibida limitada a 100%. “—” indica ausência de base. Períodos sem mensagens não são preenchidos com zero; os resultados podem estar parciais.</p>
+    <div class="operation-actions"><button data-group="MINUTO" class="secondary">Por minuto</button><button data-group="TURNO" class="secondary">Por turno</button></div>
+    <div class="operation-table"><table><thead><tr><th>Período</th><th>Turno</th><th>Produção</th><th>PPM</th><th>Disponibilidade</th><th>Performance</th><th>Qualidade</th><th>OEE</th></tr></thead><tbody id="periods"></tbody></table></div>
+  </section>
+  <section class="panel line-panel" id="local-board" hidden>
+    <div class="panel-heading"><h2>Placa simulada neste PC</h2><span class="badge">SIMULAÇÃO LOCAL</span></div>
+    <p class="note">Os comandos abaixo configuram e confirmam uma placa de software. A leitura completa segue pelo mesmo motor usado por POST /api/leituras. O protocolo MQTT da placa física permanece separado.</p>
+    <div class="operation-actions"><button data-command="CONFIGURAR_PELA_REVISAO" class="secondary">Habilitar contadores da revisão</button><button data-command="DESLIGAR" class="secondary">Simular queda de energia</button><button data-command="LIGAR" class="secondary">Ligar placa</button><button data-command="RECUPERAR" class="primary">Reconfigurar e retomar</button></div>
+    <p id="board-status" class="note"></p>
+    <form id="sample-form"><fieldset><div class="line-fields">
+      <label>Avançar relógio simulado (s)<input id="step" type="number" min="1" max="3600" value="5" required></label>
+      <label>Pulsos do total<input id="total-pulses" type="number" min="0" max="9007199254740991" value="10" required></label>
+      <label>Pulsos de boas/rejeitadas<input id="quality-pulses" type="number" min="0" max="9007199254740991" value="10" required></label>
+      <label class="operation-checkbox"><input id="running" type="checkbox" checked>Máquina rodando</label>
+    </div><div class="form-footer"><span>Um pulso completo contém uma borda de subida e uma de descida.</span><button class="primary" type="submit">Enviar próxima leitura</button></div></fieldset></form>
+  </section>
+  <section class="panel line-panel">
+    <div class="panel-heading"><h2>Parada programada</h2></div>
+    <form id="planned-form"><fieldset><div class="line-fields"><label>Início (horário deste navegador)<input id="planned-start" type="datetime-local" required></label><label>Fim (horário deste navegador)<input id="planned-end" type="datetime-local" required></label><label>Motivo<input id="planned-reason" maxlength="200" required></label></div><div class="form-footer"><span>Somente períodos futuros em relação às amostras recebidas.</span><button class="secondary" type="submit">Programar exclusão do planejado</button></div></fieldset></form>
+  </section>
+  <section class="panel line-panel"><h2>Controle da execução</h2><label>Motivo da retomada<input id="resume-reason" maxlength="200" placeholder="Ex.: contadores reconfigurados após energia"></label><p class="note">Retomar cria uma nova referência de contagem e mantém os resultados já confirmados. Não envia comandos à placa física.</p><div class="operation-actions"><button id="resume" class="secondary">Retomar referência</button><button id="stop" class="secondary">Encerrar execução</button></div></section>
+</main>
+</body>
+</html>

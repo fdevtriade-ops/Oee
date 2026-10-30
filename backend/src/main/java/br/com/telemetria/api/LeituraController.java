@@ -17,15 +17,19 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping("/api/leituras")
 public class LeituraController {
     private final LeituraService service;
+    private final br.com.telemetria.api.operacao.MotorOperacional motor;
 
-    public LeituraController(LeituraService service) {
+    public LeituraController(LeituraService service,br.com.telemetria.api.operacao.MotorOperacional motor) {
         this.service = service;
+        this.motor = motor;
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void receber(@RequestBody Map<String, Object> dados) {
-        service.receber(dados);
+        var leitura=service.validar(dados);
+        motor.processar(leitura);
+        service.armazenar(leitura);
     }
 
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
