@@ -1,0 +1,15 @@
+{
+  "fuso": "UTC",
+  "lacunaMaximaSegundos": 15,
+  "atrasoMaximoSegundos": 3600,
+  "adiantamentoMaximoSegundos": 3600,
+  "microparadaLimiteSegundos": 10,
+  "microparadaLimiteInclusivo": true,
+  "turnos": [{ "nome": "Teste 24h", "inicio": "00:00", "fim": "00:00" }],
+  "estadoNoIntervalo": "AMOSTRA_ANTERIOR",
+  "foraDeOrdem": "IGNORAR",
+  "lacunas": "DESCARTAR_E_REINICIAR_REFERENCIA",
+  "fronteiras": "DESCARTAR_INTERVALO",
+  "programadas": "EXCLUIR_DO_PLANEJADO",
+  "paradaInterrompida": "DESCARTAR_PENDENTES"
+}

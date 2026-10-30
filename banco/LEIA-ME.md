@@ -1,6 +1,8 @@
 # Cadastro inicial da linha
 
-Esta entrega adiciona descoberta dos dispositivos recebidos e um rascunho persistente de nome da linha, produto fixo e velocidade ideal em produtos por minuto. Não ativa produção, não envia comandos à placa e não escreve no InfluxDB. Os canais recebidos são apresentados com seus valores brutos; a configuração de canais está disponível após a migração 002 (ver CANAIS-RASCUNHO.md); a tela web será uma etapa seguinte.
+Para um banco novo, execute primeiro `000_configuracao_inicial.sql`, depois `001_linha_rascunho.sql` e `002_canal_rascunho.sql`. O script 000 cria o schema, as três tabelas legadas e o catálogo inicial; não cria máquinas/canais de exemplo e não altera as configurações existentes. Reexecutá-lo não corrige uma estrutura incompatível. Consulte [instalação e atualização](../INSTALACAO-ATUALIZACAO.md) para permissões e conferência.
+
+Esta entrega adiciona descoberta dos dispositivos recebidos e um rascunho persistente de nome da linha, produto fixo e velocidade ideal em produtos por minuto. Não ativa produção, não envia comandos à placa e não escreve no InfluxDB. Os canais recebidos são apresentados com seus valores brutos; a configuração de canais está disponível após a migração 002 (ver CANAIS-RASCUNHO.md). O configurador web já está disponível na raiz da API.
 
 ## Aplicar pelo IntelliJ
 

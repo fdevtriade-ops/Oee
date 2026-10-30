@@ -27,6 +27,10 @@ public class LeituraService {
     private final Map<String, Map<String, Object>> ultimasLeituras = new ConcurrentHashMap<>();
 
     public void receber(Map<String, Object> dados) {
+        armazenar(validar(dados));
+    }
+
+    public Map<String,Object> validar(Map<String,Object> dados) {
         Instant recebidoEm = Instant.now();
         if (!(dados.get("id") instanceof String id) || id.isBlank()) {
             throw new IllegalArgumentException("O campo id deve ser um texto não vazio.");
@@ -79,7 +83,11 @@ public class LeituraService {
         leitura.put("recebidoEm", recebidoEm.toString());
 
         // Valida tudo antes de substituir; metadados enviados pelo cliente não são confiados.
-        ultimasLeituras.put(id, Collections.unmodifiableMap(leitura));
+        return Collections.unmodifiableMap(leitura);
+    }
+
+    public void armazenar(Map<String,Object> leitura) {
+        ultimasLeituras.put((String)leitura.get("id"),leitura);
     }
 
     private long validarContador(String canal, Object valor) {

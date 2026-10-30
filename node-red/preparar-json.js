@@ -1,64 +1,43 @@
-// Cole no nó Function "Preparar JSON para API".
-// Conecte diretamente ao MQTT in do tópico My_Home_1/BM/JSON.
+// Conecte em paralelo ao ramo existente de temperatura/umidade, sem removê-lo.
 const BACKEND_URL = env.get("BACKEND_URL") || "http://127.0.0.1:8080/api/leituras";
+const DISPOSITIVO = env.get("OEE_DEVICE_ID") || "TRD2001";
+if (msg.topic !== "My_Home_1/BM/JSON") return null;
 
-if (msg.topic !== "My_Home_1/BM/JSON") {
+// Preserve o texto MQTT: JSON.parse + stringify pode arredondar contadores Long.
+const original = Buffer.isBuffer(msg.payload) ? msg.payload.toString("utf8") : msg.payload;
+let dados;
+try {
+    dados = typeof original === "string" ? JSON.parse(original) : original;
+} catch (erro) {
+    node.error("O payload não contém JSON válido", msg);
     return null;
 }
-
-let dados = msg.payload;
-if (Buffer.isBuffer(dados)) {
-    dados = dados.toString("utf8");
-}
-
-if (typeof dados === "string") {
-    try {
-        dados = JSON.parse(dados);
-    } catch (erro) {
-        node.error("O payload não contém JSON válido", msg);
-        return null;
-    }
-}
-
 if (!dados || typeof dados !== "object" || Array.isArray(dados)) {
     node.error("O payload deve ser um objeto JSON", msg);
     return null;
 }
-
-if (typeof dados.id !== "string" || dados.id.trim() === "") {
-    node.error("O JSON deve conter o id do equipamento", msg);
+// O tópico é compartilhado. Outros equipamentos e mensagens ambientais não seguem à API.
+if (dados.id !== DISPOSITIVO && dados.id !== "TRD_TESTE") return null;
+const contadores = ["contadorDI1", "contadorDI2", "contadorDI3", "contadorDI4"];
+if (!contadores.some(canal => Object.hasOwn(dados, canal))) return null;
+if (!contadores.every(canal => Object.hasOwn(dados, canal)) || !Object.hasOwn(dados, "timestamp")) {
+    node.error("O JSON MK2 deve conter os quatro contadores e timestamp", msg);
     return null;
 }
-
-const digitais = ["DI1", "DI2", "DI3", "DI4", "DO1", "DO2", "DO3", "DO4"];
-const analogicos = ["AI1", "AI2", "AI3", "AI4"];
-const payload = { id: dados.id };
-
-for (const canal of digitais) {
-    if (dados[canal] !== 0 && dados[canal] !== 1) {
-        node.error(`${canal} deve ser um número 0 ou 1`, msg);
-        return null;
-    }
-    payload[canal] = dados[canal];
+// Objetos já convertidos podem ter perdido precisão; exija o texto original nesse caso.
+if (typeof original !== "string" && contadores.some(canal =>
+    typeof dados[canal] === "number" && !Number.isSafeInteger(dados[canal]))) {
+    node.error("Contador sem precisão segura: configure o MQTT para retornar texto ou buffer", msg);
+    return null;
 }
-
-for (const canal of analogicos) {
-    if (typeof dados[canal] !== "number" || !Number.isFinite(dados[canal])) {
-        node.error(`${canal} deve ser um número finito`, msg);
-        return null;
-    }
-    payload[canal] = dados[canal];
-}
-
-// Somente payload será o corpo HTTP. Os demais campos controlam o nó HTTP Request.
-// Esta rota MQTT cria headers próprios e não herda configurações da rota Influx.
+// A API valida os valores e o horário. Não herde headers/opções HTTP do ramo Influx.
 return {
     _msgid: msg._msgid,
-    equipamentoId: payload.id,
+    equipamentoId: dados.id,
     method: "POST",
     url: BACKEND_URL,
     headers: { "Content-Type": "application/json", "Accept": "application/json" },
-    payload: JSON.stringify(payload),
+    payload: typeof original === "string" ? original : JSON.stringify(dados),
     requestTimeout: 10000,
     followRedirects: false
 };
